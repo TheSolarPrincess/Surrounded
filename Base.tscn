@@ -1,0 +1,71 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://icon.png" type="Texture" id=1]
+
+[sub_resource type="GDScript" id=1]
+script/source = "extends Node2D
+
+var is_drawing := false
+var drawing_trail := Vector2()
+
+func _unhandled_input(event):
+	if event.is_action_pressed(\"draw\"):
+		print(\"pressed\")
+		$Line2D.points = []
+		is_drawing = true
+		drawing_trail = get_global_mouse_position()
+		
+	if event.is_action_released(\"draw\"):
+		print(\"released\")
+		is_drawing = false
+func _process(delta):
+	var allowance = 10 # px
+	if is_drawing:
+		if drawing_trail.distance_to(get_global_mouse_position()) < allowance:
+			return
+		$Line2D.add_point(get_global_mouse_position())
+		drawing_trail = get_global_mouse_position()
+		does_self_intersect()
+		
+func does_self_intersect():
+	if $Line2D.points.size() < 4: return false
+	var new_line_from = $Line2D.points[$Line2D.points.size()-1]
+	var new_line_to  = $Line2D.points[$Line2D.points.size()-2]
+	#print(\"----- %s\" % $Line2D.points.size())
+	for i in range(2, $Line2D.points.size()-1):
+		var old_line_from = $Line2D.points[i-1]
+		var old_line_to  = $Line2D.points[i-2]
+		var intersection = (Geometry.segment_intersects_segment_2d (new_line_from, new_line_to, old_line_from, old_line_to))
+		#print(\"intersection %s\" % i)
+		if intersection != null:
+			print(\"Intersection!\")
+			var line1 := Line2D.new()
+			add_child(line1)
+			line1.default_color = Color.red
+			line1.width = 3
+			var line2 := Line2D.new()
+			add_child(line2)
+			line2.default_color = Color.green
+			line2.width = 3
+			line1.add_point(old_line_from)
+			line1.add_point(old_line_to)
+			line2.add_point(new_line_from)
+			line2.add_point(new_line_to)
+			var s = $icon.duplicate()
+			add_child(s)
+			s.position = intersection
+			"
+
+[node name="Node2D" type="Node2D"]
+
+[node name="Drawbox" type="Node2D" parent="."]
+script = SubResource( 1 )
+
+[node name="Line2D" type="Line2D" parent="Drawbox"]
+points = PoolVector2Array( 0, 0, 50, 50, 813, 210, 689, 72, 508, 82, 485, 58, 432, 54, 292, 155, 166, 103, 274, 124 )
+texture_mode = -1081081856
+
+[node name="icon" type="Sprite" parent="Drawbox"]
+position = Vector2( 91, 453 )
+scale = Vector2( 0.28125, 0.21875 )
+texture = ExtResource( 1 )
