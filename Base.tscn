@@ -1,4 +1,4 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://icon.png" type="Texture" id=1]
 
@@ -12,14 +12,13 @@ var drawing_trail := Vector2()
 
 func _unhandled_input(event):
 	if event.is_action_pressed(\"draw\"):
-		print(\"pressed\")
 		$Line2D.points = []
 		is_drawing = true
 		drawing_trail = get_global_mouse_position()
 		
 	if event.is_action_released(\"draw\"):
-		print(\"released\")
 		is_drawing = false
+		
 func _process(delta):
 	var allowance = 10 # px
 	if is_drawing:
@@ -33,33 +32,25 @@ func does_self_intersect():
 	if $Line2D.points.size() < 4: return false
 	var new_line_from = $Line2D.points[$Line2D.points.size()-1]
 	var new_line_to  = $Line2D.points[$Line2D.points.size()-2]
-	#print(\"----- %s\" % $Line2D.points.size())
+	
+	# wall intersection
+	var space_state = get_world_2d().direct_space_state
+	var result = space_state.intersect_ray(new_line_to, new_line_from)
+	if result.get(\"collider\", false) and result[\"collider\"].get_class() == \"TileMap\":
+		print(\"Wall\")
+		is_drawing = false
+		$Line2D.points[$Line2D.points.size()-1] = result[\"position\"]
+		return
+	
+	# self-intersection
 	for i in range(2, $Line2D.points.size()-1):
 		var old_line_from = $Line2D.points[i-1]
 		var old_line_to  = $Line2D.points[i-2]
 		var intersection = (Geometry.segment_intersects_segment_2d (new_line_from, new_line_to, old_line_from, old_line_to))
-		#print(\"intersection %s\" % i)
 		if intersection != null:
-			print(\"Intersection!\")
 			is_drawing = false
-			\"\"\"
-			var line1 := Line2D.new()
-			add_child(line1)
-			line1.default_color = Color.red
-			line1.width = 3
-			var line2 := Line2D.new()
-			add_child(line2)
-			line2.default_color = Color.green
-			line2.width = 3
-			line1.add_point(old_line_from)
-			line1.add_point(old_line_to)
-			line2.add_point(new_line_from)
-			line2.add_point(new_line_to)
-			var s = $icon.duplicate()
-			add_child(s)
-			s.position = intersection
-			\"\"\"
-			print(sprites_inside_polygon(intersection, i))
+			sprites_inside_polygon(intersection, i)
+			return
 			
 func sprites_inside_polygon(intersection_point, intersection_index):
 	var polygon := PoolVector2Array()
@@ -67,18 +58,18 @@ func sprites_inside_polygon(intersection_point, intersection_index):
 	for i in range(intersection_index+1, $Line2D.points.size()):
 		polygon.append($Line2D.points[i])
 	
-	$Area2D/CollisionPolygon2D.set_polygon( polygon)
-	#$Area2D/CollisionPolygon2D.set_polygon([Vector2(0,0), Vector2(1000, 0), Vector2(0,1000)])
-	#print($Area2D/CollisionPolygon2D.polygon)
+	$InsideArea/CollisionPolygon2D.set_polygon( polygon)
+	$BorderArea/CollisionPolygon2D.set_polygon( polygon)
 	emit_signal(\"update_visibility\")
 	
 
 func _on_Drawbox_update_visibility():
+	return
 	yield(get_tree(),\"idle_frame\")
 	yield(get_tree(),\"idle_frame\")
 	yield(get_tree(),\"idle_frame\")
 	for sprite in $Node2D.get_children():
-		if $Area2D.overlaps_body(sprite):
+		if $InsideArea.overlaps_body(sprite) and not ($BorderArea.overlaps_body(sprite)):
 			sprite.visible = true
 		else:
 			sprite.visible = false
@@ -86,6 +77,36 @@ func _on_Drawbox_update_visibility():
 
 [sub_resource type="RectangleShape2D" id=2]
 extents = Vector2( 8.8343, 6.81854 )
+
+[sub_resource type="GDScript" id=3]
+script/source = "extends Sprite
+
+func _process(delta):
+	position = get_global_mouse_position()"
+
+[sub_resource type="ConvexPolygonShape2D" id=5]
+points = PoolVector2Array( 0, 0, 16, 0, 16, 16, 0, 16 )
+
+[sub_resource type="TileSet" id=4]
+0/name = "icon.png 0"
+0/texture = ExtResource( 1 )
+0/tex_offset = Vector2( 0, 0 )
+0/modulate = Color( 1, 1, 1, 1 )
+0/region = Rect2( 0, 0, 16, 16 )
+0/tile_mode = 0
+0/occluder_offset = Vector2( 0, 0 )
+0/navigation_offset = Vector2( 0, 0 )
+0/shapes = [ {
+"autotile_coord": Vector2( 0, 0 ),
+"one_way": false,
+"one_way_margin": 1.0,
+"shape": SubResource( 5 ),
+"shape_transform": Transform2D( 1, 0, 0, 1, 0, 0 )
+} ]
+0/z_index = 0
+
+[sub_resource type="CircleShape2D" id=6]
+radius = 31.7495
 
 [node name="Node2D" type="Node2D"]
 
@@ -97,6 +118,7 @@ texture_mode = -1081081856
 
 [node name="Node2D" type="Node2D" parent="Drawbox"]
 editor/display_folded = true
+position = Vector2( -1690.42, 86.3388 )
 
 [node name="Not" type="KinematicBody2D" parent="Drawbox/Node2D"]
 editor/display_folded = true
@@ -12576,8 +12598,34 @@ texture = ExtResource( 1 )
 position = Vector2( 14.7531, 13.8311 )
 shape = SubResource( 2 )
 
-[node name="Area2D" type="Area2D" parent="Drawbox"]
+[node name="InsideArea" type="Area2D" parent="Drawbox"]
 
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Drawbox/Area2D"]
-polygon = PoolVector2Array( 0, 0, 100, 100, 924.267, 331.173, 1192.22, 195.932 )
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Drawbox/InsideArea"]
+
+[node name="BorderArea" type="Area2D" parent="Drawbox"]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Drawbox/BorderArea"]
+build_mode = 1
+
+[node name="Cursor" type="Sprite" parent="."]
+position = Vector2( 5.72791, -0.715988 )
+scale = Vector2( 0.328762, 0.351137 )
+texture = ExtResource( 1 )
+script = SubResource( 3 )
+
+[node name="TileMap" type="TileMap" parent="."]
+tile_set = SubResource( 4 )
+cell_size = Vector2( 16, 16 )
+format = 1
+tile_data = PoolIntArray( -65496, 0, 0, 33, 0, 0, 34, 0, 0, 35, 0, 0, 36, 0, 0, 37, 0, 0, 38, 0, 0, 39, 0, 0, 40, 0, 0, 65569, 0, 0, 65570, 0, 0, 65571, 0, 0, 65572, 0, 0, 65573, 0, 0, 65574, 0, 0, 65575, 0, 0, 65576, 0, 0, 131105, 0, 0, 131106, 0, 0, 131107, 0, 0, 131108, 0, 0, 131109, 0, 0, 131110, 0, 0, 131111, 0, 0, 131112, 0, 0, 196641, 0, 0, 196642, 0, 0, 196643, 0, 0, 196644, 0, 0, 196645, 0, 0, 196646, 0, 0, 196647, 0, 0, 196648, 0, 0, 262164, 0, 0, 262165, 0, 0, 262166, 0, 0, 262167, 0, 0, 262168, 0, 0, 262176, 0, 0, 262177, 0, 0, 262178, 0, 0, 262179, 0, 0, 262180, 0, 0, 262181, 0, 0, 262182, 0, 0, 262183, 0, 0, 262184, 0, 0, 327692, 0, 0, 327693, 0, 0, 327694, 0, 0, 327695, 0, 0, 327696, 0, 0, 327697, 0, 0, 327698, 0, 0, 327699, 0, 0, 327705, 0, 0, 327706, 0, 0, 327712, 0, 0, 327713, 0, 0, 327714, 0, 0, 327715, 0, 0, 327716, 0, 0, 327717, 0, 0, 327718, 0, 0, 327719, 0, 0, 327720, 0, 0, 327721, 0, 0, 393227, 0, 0, 393240, 0, 0, 393243, 0, 0, 393244, 0, 0, 393248, 0, 0, 393249, 0, 0, 393250, 0, 0, 393251, 0, 0, 393252, 0, 0, 393253, 0, 0, 393254, 0, 0, 393255, 0, 0, 393256, 0, 0, 393257, 0, 0, 458762, 0, 0, 458776, 0, 0, 458781, 0, 0, 458782, 0, 0, 458783, 0, 0, 458787, 0, 0, 458788, 0, 0, 458789, 0, 0, 458790, 0, 0, 458791, 0, 0, 458792, 0, 0, 524298, 0, 0, 524309, 0, 0, 524310, 0, 0, 524311, 0, 0, 524312, 0, 0, 524313, 0, 0, 524314, 0, 0, 524320, 0, 0, 524321, 0, 0, 524322, 0, 0, 524323, 0, 0, 524324, 0, 0, 524325, 0, 0, 524326, 0, 0, 524327, 0, 0, 524328, 0, 0, 589834, 0, 0, 589843, 0, 0, 589844, 0, 0, 589848, 0, 0, 589851, 0, 0, 589852, 0, 0, 589859, 0, 0, 589860, 0, 0, 589861, 0, 0, 655370, 0, 0, 655378, 0, 0, 655384, 0, 0, 655389, 0, 0, 655390, 0, 0, 655398, 0, 0, 655399, 0, 0, 720906, 0, 0, 720912, 0, 0, 720913, 0, 0, 720920, 0, 0, 720927, 0, 0, 720928, 0, 0, 720929, 0, 0, 720936, 0, 0, 720937, 0, 0, 786442, 0, 0, 786448, 0, 0, 786456, 0, 0, 786465, 0, 0, 786466, 0, 0, 786474, 0, 0, 786475, 0, 0, 851979, 0, 0, 851983, 0, 0, 851992, 0, 0, 852002, 0, 0, 852012, 0, 0, 917515, 0, 0, 917519, 0, 0, 917528, 0, 0, 917538, 0, 0, 917549, 0, 0, 917550, 0, 0, 983051, 0, 0, 983055, 0, 0, 983064, 0, 0, 983074, 0, 0, 983086, 0, 0, 1048582, 0, 0, 1048583, 0, 0, 1048587, 0, 0, 1048591, 0, 0, 1048600, 0, 0, 1048610, 0, 0, 1048622, 0, 0, 1114120, 0, 0, 1114121, 0, 0, 1114122, 0, 0, 1114124, 0, 0, 1114127, 0, 0, 1114134, 0, 0, 1114135, 0, 0, 1114136, 0, 0, 1114145, 0, 0, 1114159, 0, 0, 1179659, 0, 0, 1179660, 0, 0, 1179661, 0, 0, 1179664, 0, 0, 1179665, 0, 0, 1179666, 0, 0, 1179667, 0, 0, 1179668, 0, 0, 1179669, 0, 0, 1179681, 0, 0, 1179695, 0, 0, 1245196, 0, 0, 1245197, 0, 0, 1245198, 0, 0, 1245199, 0, 0, 1245216, 0, 0, 1245217, 0, 0, 1245231, 0, 0, 1310734, 0, 0, 1310735, 0, 0, 1310736, 0, 0, 1310751, 0, 0, 1310766, 0, 0, 1310767, 0, 0, 1376272, 0, 0, 1376273, 0, 0, 1376274, 0, 0, 1376275, 0, 0, 1376276, 0, 0, 1376284, 0, 0, 1376285, 0, 0, 1376286, 0, 0, 1376300, 0, 0, 1376301, 0, 0, 1441810, 0, 0, 1441811, 0, 0, 1441813, 0, 0, 1441814, 0, 0, 1441815, 0, 0, 1441816, 0, 0, 1441817, 0, 0, 1441818, 0, 0, 1441819, 0, 0, 1441833, 0, 0, 1441834, 0, 0, 1441835, 0, 0, 1507348, 0, 0, 1507349, 0, 0, 1507366, 0, 0, 1507367, 0, 0, 1507368, 0, 0, 1572886, 0, 0, 1572899, 0, 0, 1572900, 0, 0, 1572901, 0, 0, 1638423, 0, 0, 1638424, 0, 0, 1638432, 0, 0, 1638433, 0, 0, 1638434, 0, 0, 1703961, 0, 0, 1703965, 0, 0, 1703966, 0, 0, 1703967, 0, 0, 1769498, 0, 0, 1769499, 0, 0, 1769500, 0, 0, 1835032, 0, 0, 1835033, 0, 0, 1835035, 0, 0, 1835036, 0, 0, 1900558, 0, 0, 1900559, 0, 0, 1900560, 0, 0, 1900565, 0, 0, 1900566, 0, 0, 1900567, 0, 0, 1900573, 0, 0, 1966096, 0, 0, 1966097, 0, 0, 1966098, 0, 0, 1966099, 0, 0, 1966100, 0, 0, 1966110, 0, 0, 1966127, 0, 0, 1966128, 0, 0, 2031647, 0, 0, 2031648, 0, 0, 2031649, 0, 0, 2031650, 0, 0, 2031651, 0, 0, 2031652, 0, 0, 2031653, 0, 0, 2031654, 0, 0, 2031655, 0, 0, 2031656, 0, 0, 2031657, 0, 0, 2031658, 0, 0, 2031659, 0, 0, 2031660, 0, 0, 2031661, 0, 0, 2031662, 0, 0, 2031663, 0, 0 )
+
+[node name="RigidBody2D" type="RigidBody2D" parent="."]
+position = Vector2( -488.934, -18.6285 )
+can_sleep = false
+
+[node name="Sprite" type="Sprite" parent="RigidBody2D"]
+texture = ExtResource( 1 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RigidBody2D"]
+shape = SubResource( 6 )
 [connection signal="update_visibility" from="Drawbox" to="Drawbox" method="_on_Drawbox_update_visibility"]
