@@ -19,6 +19,10 @@ config/name="Surrounded"
 run/main_scene="res://Base.tscn"
 config/icon="res://icon.png"
 
+[autoload]
+
+Scorekeeper="*res://Scorekeeper.tscn"
+
 [input]
 
 draw={

@@ -7,7 +7,7 @@ script/source = "extends KinematicBody2D
 
 export(Vector2) var fly_direction = Vector2(1,0.5)
 export(float) var speed = 200
-export(float) var noise = 3
+export(float) var noise = 5
 
 signal dead
 
@@ -20,7 +20,7 @@ func _physics_process(delta):
 	var test_collision = self.move_and_collide(moving_vector, true, true, true)
 	if test_collision != null:
 		var collide_normal = test_collision.get_normal()
-		moving_vector = moving_vector.bounce(collide_normal)
+		moving_vector = moving_vector.bounce(collide_normal).rotated(random_precession)
 	fly_direction = moving_vector.normalized()
 	self.move_and_collide(moving_vector, true, true, false)
 	check_line_intersect(moving_vector)
