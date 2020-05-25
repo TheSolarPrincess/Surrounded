@@ -6,7 +6,7 @@
 [sub_resource type="GDScript" id=2]
 script/source = "extends Node2D
 
-signal line_completed (killed_enemies)
+signal line_completed (killed_enemies, position_of_intersect)
 signal line_interrupted
 signal line_wallbonked
 signal line_empty
@@ -104,7 +104,7 @@ func activate_inside_polygon(intersection_point, intersection_index):
 	if amount_killed == 0:
 		emit_signal(\"line_empty\")
 	else:
-		emit_signal(\"line_completed\", amount_killed)
+		emit_signal(\"line_completed\", amount_killed, intersection_point)
 	
 
 
@@ -234,6 +234,7 @@ autostart = true
 script = SubResource( 6 )
 
 [node name="UI" parent="." instance=ExtResource( 2 )]
+timeleft = 120
 [connection signal="line_completed" from="Drawbox" to="UI" method="_on_Drawbox_line_completed"]
 [connection signal="line_empty" from="Drawbox" to="UI" method="_on_Drawbox_line_empty"]
 [connection signal="line_interrupted" from="Drawbox" to="UI" method="_on_Drawbox_line_interrupted"]
