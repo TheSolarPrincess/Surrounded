@@ -28,6 +28,8 @@ func _physics_process(delta):
 func check_line_intersect(moving_vector:Vector2):
 	#print(get_tree().get_nodes_in_group(\"theline\"))
 	var line:Line2D = get_tree().get_nodes_in_group(\"theline\")[0]
+	if line.get_parent().is_drawing == false:
+		return
 	
 	for i in range(2, line.points.size()-1):
 		var start = line.points[i-1]
@@ -35,10 +37,16 @@ func check_line_intersect(moving_vector:Vector2):
 		var intersection = (Geometry.segment_intersects_segment_2d (start, end, position, position+moving_vector))
 		if intersection != null:
 			get_tree().get_nodes_in_group(\"drawbox\")[0].interrupt(self)
+			var explosion = preload(\"res://Juice/Mistake.tscn\").instance()
+			get_node(\"/root\").add_child(explosion)
+			explosion.global_position = self.global_position
 			break
 	
 func areactivate():
-	print(\"ded\")
+	var death_anim = preload(\"res://Juice/KillAnim.tscn\")
+	var anim = death_anim.instance()
+	get_node(\"/root\").add_child(anim)
+	anim.global_position = self.global_position
 	queue_free()
 	emit_signal(\"dead\")
 "

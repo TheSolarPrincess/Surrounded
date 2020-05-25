@@ -1,20 +1,7 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://Untitled.png" type="Texture" id=1]
 [ext_resource path="res://UI.tscn" type="PackedScene" id=2]
-
-[sub_resource type="GDScript" id=1]
-script/source = "extends Node2D
-
-# Called when the node enters the scene tree for the first time.
-func _ready():
-	set_up_enemy_signals()
-	
-	
-func set_up_enemy_signals():
-	for enemy in get_tree().get_nodes_in_group(\"enemies\"):
-		pass
-"
 
 [sub_resource type="GDScript" id=2]
 script/source = "extends Node2D
@@ -49,8 +36,8 @@ func fadeout():
 func _process(delta):
 	var allowance = 10 # px
 	if is_drawing:
-		#if drawing_trail.distance_to(get_global_mouse_position()) < allowance:
-		#	return
+		if drawing_trail.distance_to(get_global_mouse_position()) < allowance:
+			return
 		$Line2D.add_point(get_global_mouse_position())
 		drawing_trail = get_global_mouse_position()
 		does_self_intersect()
@@ -66,7 +53,10 @@ func does_self_intersect():
 	if result.get(\"collider\", false) and result[\"collider\"].get_class() == \"TileMap\":
 		is_drawing = false
 		$Line2D.points[$Line2D.points.size()-1] = result[\"position\"]
-		$Line2D.default_color = Color.lightblue
+		$Line2D.default_color = Color.red
+		var explosion = preload(\"res://Juice/Mistake.tscn\").instance()
+		get_node(\"/root\").add_child(explosion)
+		explosion.global_position = result[\"position\"]
 		$Timer.start(1.0)
 		emit_signal(\"line_wallbonked\")
 		return
@@ -115,7 +105,12 @@ func activate_inside_polygon(intersection_point, intersection_index):
 		emit_signal(\"line_empty\")
 	else:
 		emit_signal(\"line_completed\", amount_killed)
-	"
+	
+
+
+func _on_Line2D_visibility_changed():
+	print(\"visibility changed\")
+"
 
 [sub_resource type="ConvexPolygonShape2D" id=3]
 points = PoolVector2Array( 0, 0, 16, 0, 16, 16, 0, 16 )
@@ -180,7 +175,6 @@ func _on_InitialSpawnTimer_timeout():
 "
 
 [node name="Base" type="Node2D"]
-script = SubResource( 1 )
 
 [node name="Drawbox" type="Node2D" parent="." groups=[
 "drawbox",
@@ -244,7 +238,8 @@ script = SubResource( 6 )
 [connection signal="line_empty" from="Drawbox" to="UI" method="_on_Drawbox_line_empty"]
 [connection signal="line_interrupted" from="Drawbox" to="UI" method="_on_Drawbox_line_interrupted"]
 [connection signal="line_wallbonked" from="Drawbox" to="UI" method="_on_Drawbox_line_wallbonked"]
+[connection signal="visibility_changed" from="Drawbox/Line2D" to="Drawbox" method="_on_Line2D_visibility_changed"]
 [connection signal="timeout" from="Drawbox/Timer" to="Drawbox" method="fadeout"]
 [connection signal="timeout" from="Enemies/Timer" to="Enemies" method="_on_Timer_timeout"]
-[connection signal="timeout" from="Enemies/InitialSpawnTimer" to="Enemies/InitialSpawnTimer" method="_on_InitialSpawnTimer_timeout"]
 [connection signal="timeout" from="Enemies/InitialSpawnTimer" to="Enemies" method="_on_InitialSpawnTimer_timeout"]
+[connection signal="timeout" from="Enemies/InitialSpawnTimer" to="Enemies/InitialSpawnTimer" method="_on_InitialSpawnTimer_timeout"]
