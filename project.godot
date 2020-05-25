@@ -39,6 +39,10 @@ draw={
  ]
 }
 
+[input_devices]
+
+pointing/emulate_touch_from_mouse=true
+
 [rendering]
 
 vram_compression/import_etc=true

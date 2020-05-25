@@ -1,7 +1,8 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=10 format=2]
 
 [ext_resource path="res://Untitled.png" type="Texture" id=1]
 [ext_resource path="res://UI.tscn" type="PackedScene" id=2]
+[ext_resource path="res://Roboto-Regular.ttf" type="DynamicFontData" id=3]
 
 [sub_resource type="GDScript" id=1]
 script/source = "extends Node2D
@@ -31,6 +32,14 @@ func _unhandled_input(event):
 				$Line2D.default_color = Color.lightblue
 				is_drawing = false
 				$Timer.start(1.0)
+		elif event is InputEventScreenDrag:
+			var allowance = 10 # px
+			if is_drawing:
+				if drawing_trail.distance_to(event.position) < allowance:
+					return
+				$Line2D.add_point(event.position)
+				drawing_trail = event.position
+				does_self_intersect()
 	else:
 		if event.is_action_pressed(\"draw\"):
 			$Timer.stop()
@@ -54,16 +63,9 @@ func fadeout():
 		
 		
 func _process(delta):
-	var allowance = 10 # px
+	if OS.get_name() != \"Android\":
+		var allowance = 10 # px
 	
-	if OS.get_name() == \"Android\":
-		if is_drawing:
-			if drawing_trail.distance_to(touch_position) < allowance:
-				return
-			$Line2D.add_point(touch_position)
-			drawing_trail = touch_position
-			does_self_intersect()
-	else:
 		if is_drawing:
 			if drawing_trail.distance_to(get_global_mouse_position()) < allowance:
 				return
@@ -127,7 +129,7 @@ func activate_inside_polygon(intersection_point, intersection_index):
 	yield(get_tree(),\"idle_frame\")
 	var amount_killed = 0
 	for item in get_tree().get_nodes_in_group(\"areactivatable\"):
-		if $InsideArea.overlaps_body(item) and not ($BorderArea.overlaps_body(item)):
+		if $InsideArea.overlaps_body(item): # and not ($BorderArea.overlaps_body(item)):
 			item.areactivate()
 			amount_killed += 1
 	if amount_killed == 0:
@@ -203,6 +205,10 @@ func _on_InitialSpawnTimer_timeout():
 	if amount == 0: queue_free()
 "
 
+[sub_resource type="DynamicFont" id=6]
+size = 29
+font_data = ExtResource( 3 )
+
 [node name="Base" type="Node2D"]
 
 [node name="Drawbox" type="Node2D" parent="." groups=[
@@ -264,6 +270,17 @@ script = SubResource( 5 )
 
 [node name="UI" parent="." instance=ExtResource( 2 )]
 timeleft = 120
+
+[node name="Label" type="Label" parent="."]
+margin_left = 485.0
+margin_top = 19.0
+margin_right = 1340.0
+margin_bottom = 79.0
+custom_fonts/font = SubResource( 6 )
+text = "debug label"
+__meta__ = {
+"_edit_use_anchors_": false
+}
 [connection signal="line_completed" from="Drawbox" to="UI" method="_on_Drawbox_line_completed"]
 [connection signal="line_empty" from="Drawbox" to="UI" method="_on_Drawbox_line_empty"]
 [connection signal="line_interrupted" from="Drawbox" to="UI" method="_on_Drawbox_line_interrupted"]
