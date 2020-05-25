@@ -272,6 +272,7 @@ script = SubResource( 5 )
 timeleft = 120
 
 [node name="Label" type="Label" parent="."]
+visible = false
 margin_left = 485.0
 margin_top = 19.0
 margin_right = 1340.0
