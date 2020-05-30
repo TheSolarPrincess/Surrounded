@@ -67,14 +67,14 @@ script = SubResource( 1 )
 speed = 100.0
 
 [node name="Sprite" type="AnimatedSprite" parent="."]
-position = Vector2( -0.259781, -23.3866 )
+position = Vector2( -2.91711, -23.2205 )
 scale = Vector2( 0.065, 0.065 )
 frames = ExtResource( 1 )
-frame = 13
+frame = 25
 playing = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2( 0.518265, -5.29196 )
+position = Vector2( 0.186111, -5.62412 )
 shape = SubResource( 2 )
 
 [node name="shadow" type="Sprite" parent="."]
