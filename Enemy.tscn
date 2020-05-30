@@ -1,6 +1,7 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=5 format=2]
 
-[ext_resource path="res://Enemy.png" type="Texture" id=1]
+[ext_resource path="res://Graphics/BouncySheep/BouncySheep.tres" type="SpriteFrames" id=1]
+[ext_resource path="res://Graphics/BouncySheep/shadow.png" type="Texture" id=2]
 
 [sub_resource type="GDScript" id=1]
 script/source = "extends KinematicBody2D
@@ -22,6 +23,10 @@ func _physics_process(delta):
 		var collide_normal = test_collision.get_normal()
 		moving_vector = moving_vector.bounce(collide_normal).rotated(random_precession)
 	fly_direction = moving_vector.normalized()
+	if fly_direction.x >= 0:
+		$Sprite.flip_h = true
+	else:
+		$Sprite.flip_h = false
 	self.move_and_collide(moving_vector, true, true, false)
 	check_line_intersect(moving_vector)
 	
@@ -52,19 +57,28 @@ func areactivate():
 "
 
 [sub_resource type="CircleShape2D" id=2]
-radius = 10.104
+radius = 15.4885
 
 [node name="Enemy" type="KinematicBody2D" groups=[
 "areactivatable",
 "enemies",
 ]]
 script = SubResource( 1 )
-speed = 170.0
+speed = 100.0
 
-[node name="Sprite" type="Sprite" parent="."]
+[node name="Sprite" type="AnimatedSprite" parent="."]
+position = Vector2( -0.259781, -23.3866 )
 scale = Vector2( 0.065, 0.065 )
-texture = ExtResource( 1 )
+frames = ExtResource( 1 )
+frame = 13
+playing = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2( -0.116089, -0.0238229 )
+position = Vector2( 0.518265, -5.29196 )
 shape = SubResource( 2 )
+
+[node name="shadow" type="Sprite" parent="."]
+modulate = Color( 1, 1, 1, 0.423529 )
+position = Vector2( 0.301605, -0.209881 )
+scale = Vector2( 0.065, 0.0240939 )
+texture = ExtResource( 2 )

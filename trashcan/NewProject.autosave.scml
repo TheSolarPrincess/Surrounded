@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spriter_data scml_version="1.0" generator="BrashMonkey Spriter" generator_version="r11">
+    <folder id="0">
+        <file id="0" name="floofBody.png" width="500" height="500" pivot_x="0" pivot_y="1"/>
+        <file id="1" name="head.png" width="500" height="500" pivot_x="0" pivot_y="1"/>
+        <file id="2" name="legs_apart.png" width="500" height="500" pivot_x="0" pivot_y="1"/>
+        <file id="3" name="legs_together.png" width="500" height="500" pivot_x="0" pivot_y="1"/>
+    </folder>
+    <entity id="0" name="entity_000">
+        <animation id="0" name="NewAnimation" length="1000" interval="100">
+            <mainline>
+                <key id="0">
+                    <object_ref id="0" timeline="2" key="0" z_index="0"/>
+                    <object_ref id="1" timeline="0" key="0" z_index="1"/>
+                    <object_ref id="2" timeline="1" key="0" z_index="2"/>
+                </key>
+                <key id="1" time="300">
+                    <object_ref id="0" timeline="2" key="1" z_index="0"/>
+                    <object_ref id="1" timeline="0" key="1" z_index="1"/>
+                    <object_ref id="2" timeline="1" key="1" z_index="2"/>
+                </key>
+            </mainline>
+            <timeline id="0" name="floofBody_000">
+                <key id="0" spin="0">
+                    <object folder="0" file="0" x="-280" y="317.777778"/>
+                </key>
+                <key id="1" time="300" spin="0">
+                    <object folder="0" file="0" x="-282.222222" y="500" scale_y="1.195579"/>
+                </key>
+            </timeline>
+            <timeline id="1" name="head_000">
+                <key id="0" spin="-1">
+                    <object folder="0" file="1" x="-308.888889" y="408.888889"/>
+                </key>
+                <key id="1" time="300">
+                    <object folder="0" file="1" x="-242.222222" y="604.444444" angle="338.931025" scale_y="1"/>
+                </key>
+            </timeline>
+            <timeline id="2" name="legs_apart_000">
+                <key id="0" spin="0">
+                    <object folder="0" file="2" x="-275.555556" y="344.444444"/>
+                </key>
+                <key id="1" time="300" spin="0">
+                    <object folder="0" file="2" x="-277.777778" y="591.111111" scale_y="1.392235"/>
+                </key>
+            </timeline>
+        </animation>
+    </entity>
+</spriter_data>
