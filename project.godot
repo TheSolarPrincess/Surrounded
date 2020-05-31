@@ -15,7 +15,7 @@ _global_script_class_icons={
 
 [application]
 
-config/name="Surrounded"
+config/name="Corral"
 run/main_scene="res://Tutorial/Tutorial.tscn"
 config/icon="res://icon.png"
 
