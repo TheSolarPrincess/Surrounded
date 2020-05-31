@@ -25,14 +25,14 @@ func kill_enemies(number:int, intersection_point):
 	score += points
 	var points_splash = preload(\"res://Juice/PointsSplash.tscn\").instance()
 	get_node(\"/root\").add_child(points_splash)
-	points_splash.rect_position = intersection_point
+	points_splash.rect_global_position = intersection_point
 	points_splash.render_points(points)
 	update_ui()
 	
 func show_penal(seconds):
 	var points_splash = preload(\"res://Juice/PointsSplash.tscn\").instance()
 	get_node(\"/root\").add_child(points_splash)
-	points_splash.rect_position = points_splash.get_global_mouse_position ()
+	points_splash.rect_global_position = Vector2(0,0)# points_splash.get_global_mouse_position ()
 	points_splash.render_seconds(seconds)
 	
 func penalize_wallbonk():

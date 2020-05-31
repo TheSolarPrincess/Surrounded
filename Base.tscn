@@ -415,5 +415,5 @@ shape = SubResource( 8 )
 [connection signal="visibility_changed" from="Drawbox/Line2D" to="Drawbox" method="_on_Line2D_visibility_changed"]
 [connection signal="timeout" from="Drawbox/Timer" to="Drawbox" method="fadeout"]
 [connection signal="timeout" from="Enemies/Timer" to="Enemies" method="_on_Timer_timeout"]
-[connection signal="timeout" from="Enemies/InitialSpawnTimer" to="Enemies/InitialSpawnTimer" method="_on_InitialSpawnTimer_timeout"]
 [connection signal="timeout" from="Enemies/InitialSpawnTimer" to="Enemies" method="_on_InitialSpawnTimer_timeout"]
+[connection signal="timeout" from="Enemies/InitialSpawnTimer" to="Enemies/InitialSpawnTimer" method="_on_InitialSpawnTimer_timeout"]
