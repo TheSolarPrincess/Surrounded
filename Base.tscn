@@ -309,7 +309,6 @@ autostart = true
 script = SubResource( 6 )
 
 [node name="UI" parent="." instance=ExtResource( 2 )]
-timeleft = 120
 
 [node name="Label" type="Label" parent="."]
 visible = false

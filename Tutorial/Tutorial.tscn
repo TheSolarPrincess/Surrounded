@@ -7,6 +7,7 @@
 [ext_resource path="res://Graphics/CHICKEN Pie.otf" type="DynamicFontData" id=5]
 [ext_resource path="res://Tutorial/capture2.jpg" type="Texture" id=6]
 [ext_resource path="res://Tutorial/interrup.jpg" type="Texture" id=7]
+[ext_resource path="res://Tutorial/Font.tres" type="DynamicFont" id=8]
 
 [sub_resource type="GDScript" id=1]
 script/source = "extends CanvasLayer
@@ -71,12 +72,6 @@ func _ready():
 func _on_Button_pressed():
 	visible = false
 "
-
-[sub_resource type="DynamicFont" id=10]
-size = 70
-outline_size = 1
-outline_color = Color( 0, 0, 0, 1 )
-font_data = ExtResource( 5 )
 
 [sub_resource type="DynamicFont" id=11]
 size = 148
@@ -279,7 +274,7 @@ texture = ExtResource( 3 )
 [node name="Label" type="Label" parent="Tut3/NinePatchRect2"]
 anchor_right = 1.0
 anchor_bottom = 1.0
-custom_fonts/font = SubResource( 10 )
+custom_fonts/font = ExtResource( 8 )
 custom_colors/font_color = Color( 0.152941, 0.384314, 0.0392157, 1 )
 text = "If your lasso is interrupted, you lose time"
 align = 1
@@ -375,7 +370,7 @@ texture = ExtResource( 3 )
 [node name="Label" type="Label" parent="Tut2/NinePatchRect2"]
 anchor_right = 1.0
 anchor_bottom = 1.0
-custom_fonts/font = SubResource( 10 )
+custom_fonts/font = ExtResource( 8 )
 custom_colors/font_color = Color( 0.152941, 0.384314, 0.0392157, 1 )
 text = "The more sheep you catch at once,
  the more points you get!"
@@ -472,7 +467,7 @@ texture = ExtResource( 3 )
 [node name="Label" type="Label" parent="Tut1/NinePatchRect2"]
 anchor_right = 1.0
 anchor_bottom = 1.0
-custom_fonts/font = SubResource( 10 )
+custom_fonts/font = ExtResource( 8 )
 custom_colors/font_color = Color( 0.152941, 0.384314, 0.0392157, 1 )
 text = "Draw with your lasso to capture sheep!"
 align = 1
